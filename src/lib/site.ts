@@ -7,7 +7,7 @@
  */
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.NODE_ENV === "production" ? "https://arvin.life" : "http://localhost:3000")
+  (process.env.NODE_ENV === "production" ? "https://safetywatch.arvin.life" : "http://localhost:3000")
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "SafetyWatch";

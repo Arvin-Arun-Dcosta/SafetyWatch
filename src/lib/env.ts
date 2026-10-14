@@ -32,7 +32,7 @@ const schema = z.object({
     .string({ error: "is required" })
     .min(32, { error: "must be at least 32 characters (openssl rand -base64 32)" }),
   // Optional override; the auth base URL normally follows NEXT_PUBLIC_SITE_URL.
-  BETTER_AUTH_URL: z.url({ error: "must be a URL, e.g. https://arvin.life" }).default(SITE_URL),
+  BETTER_AUTH_URL: z.url({ error: "must be a URL, e.g. https://safetywatch.arvin.life" }).default(SITE_URL),
   GOOGLE_CLIENT_ID: z.string({ error: "is required" }).min(1, { error: "is required" }),
   GOOGLE_CLIENT_SECRET: z.string({ error: "is required" }).min(1, { error: "is required" }),
   GEMINI_API_KEY: z.string({ error: "is required" }).min(1, { error: "is required" }),

@@ -6,7 +6,7 @@
   "type": "module",
   "author": "Arvin Arun Dcosta",
   "license": "MIT",
-  "homepage": "https://arvin.life",
+  "homepage": "https://safetywatch.arvin.life",
   "engines": {
     "node": ">=20.19"
   },

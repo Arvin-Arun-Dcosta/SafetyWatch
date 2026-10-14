@@ -6,7 +6,7 @@
 
 **Community crime reporting, tracking and statistics.** File a report with or without an account, follow it with a tracking ID, and see verified incidents on a list, a map and charts.
 
-[Live Demo](https://arvin.life)
+[Live Demo](https://safetywatch.arvin.life)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
@@ -157,7 +157,7 @@ Run `npm run db:seed` again to change the admin's password; it is safe to re-run
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | no | Public URL of the site, without a trailing slash. Used for metadata, `robots.txt`, the sitemap and the auth base URL. Defaults to `https://arvin.life` in production and `http://localhost:3000` in development. Read at build time |
+| `NEXT_PUBLIC_SITE_URL` | no | Public URL of the site, without a trailing slash. Used for metadata, `robots.txt`, the sitemap and the auth base URL. Defaults to `https://safetywatch.arvin.life` in production and `http://localhost:3000` in development. Read at build time |
 | `DATABASE_URL` | yes | PostgreSQL connection string (on Neon: the pooled URL, with `sslmode=verify-full`) |
 | `DATABASE_URL_UNPOOLED` | no | Direct Neon URL used by the Prisma CLI for migrations. Falls back to `DATABASE_URL` |
 | `BETTER_AUTH_SECRET` | yes | Session secret, at least 32 characters (`openssl rand -base64 32`) |
@@ -203,14 +203,14 @@ docs/images/        README screenshots
 
 ## 🌐 Deployment
 
-SafetyWatch is deployed on [Vercel](https://vercel.com); the production domain is **arvin.life**.
+SafetyWatch is deployed on [Vercel](https://vercel.com); the production domain is **safetywatch.arvin.life**.
 
-[Live Demo](https://arvin.life)
+[Live Demo](https://safetywatch.arvin.life)
 
 1. Import the repository into Vercel. The Next.js preset needs no custom build settings; `npm install` generates the Prisma client.
 2. Create a PostgreSQL database (for example [Neon](https://neon.com)) and a **private** Vercel Blob store, and connect both to the project.
-3. Add the required environment variables from the table above. `NEXT_PUBLIC_SITE_URL` can stay unset: production builds default to `https://arvin.life`.
-4. In the Google OAuth client, add `https://arvin.life/api/auth/callback/google` as an authorised redirect URI.
+3. Add the required environment variables from the table above. `NEXT_PUBLIC_SITE_URL` can stay unset: production builds default to `https://safetywatch.arvin.life`.
+4. In the Google OAuth client, add `https://safetywatch.arvin.life/api/auth/callback/google` as an authorised redirect URI.
 5. Apply the migrations and seed once against the production database:
 
    ```bash
@@ -221,7 +221,7 @@ SafetyWatch is deployed on [Vercel](https://vercel.com); the production domain i
    npm run db:seed
    ```
 
-6. Add `arvin.life` under the project's Domains settings and deploy.
+6. Add `safetywatch.arvin.life` under the project's Domains settings and deploy.
 
 ## 📄 License
 
