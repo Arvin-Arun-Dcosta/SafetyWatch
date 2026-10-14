@@ -1,0 +1,161 @@
+// SafetyWatch database schema (PostgreSQL / Neon).
+// The connection URL lives in prisma.config.ts, not here (Prisma 7).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  VERIFIED
+  RESOLVED
+  REJECTED
+}
+
+// Declared alphabetically so ORDER BY crimeType sorts by name.
+enum CrimeType {
+  ASSAULT
+  BURGLARY
+  FRAUD
+  OTHER
+  SUSPICIOUS_ACTIVITY
+  THEFT
+  VANDALISM
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth core tables. Field names must match Better Auth's schema; only
+// `role` is ours (declared as an additional field with `input: false`).
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  reports       Report[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+/// Better Auth rate-limit counters. Stored in the database because in-memory
+/// counters do not survive between serverless invocations.
+model RateLimit {
+  id          String @id @default(uuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rateLimit")
+}
+
+// ---------------------------------------------------------------------------
+// Application tables
+// ---------------------------------------------------------------------------
+
+model Report {
+  id            String       @id @default(uuid())
+  /// 16 lowercase hex characters, generated on the server. Lets a reporter
+  /// (including an anonymous one) look up the status of their report.
+  trackingId    String       @unique @db.Char(16)
+  title         String       @db.VarChar(120)
+  description   String
+  crimeType     CrimeType
+  status        ReportStatus @default(PENDING)
+  /// Human-readable address.
+  location      String       @db.VarChar(300)
+  /// Locality used for the "top locations" statistic.
+  city          String?      @db.VarChar(80)
+  latitude      Float
+  longitude     Float
+  /// When the incident happened (an instant; shown in APP_TIME_ZONE).
+  incidentAt    DateTime     @db.Timestamptz(3)
+  /// Anonymous reports never carry a userId.
+  isAnonymous   Boolean      @default(false)
+  /// Vercel Blob URLs of evidence photos (private store).
+  imageUrls     String[]
+  /// Notes from the reviewing admin, shown as "Investigator Notes".
+  actionDetails String?
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime     @updatedAt @db.Timestamptz(3)
+
+  // Public lists, map and stats: filter by status, newest incident first.
+  @@index([status, incidentAt(sort: Desc)])
+  // "My reports": filter by owner, newest first.
+  @@index([userId, createdAt(sort: Desc)])
+  // Admin table sorts.
+  @@index([incidentAt(sort: Desc)])
+  @@index([crimeType])
+  // Nearby search (bounding box) and map queries.
+  @@index([latitude, longitude])
+  // Statistics by locality.
+  @@index([city])
+  @@map("report")
+}
